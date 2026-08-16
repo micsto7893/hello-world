@@ -2,6 +2,26 @@
 session_start();
 
 include 'includes/db.php';
+
+// Create the cart session if it does not already exist
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = array();
+}
+
+// Handle Add to Cart
+if (isset($_POST['add_to_cart'])) {
+
+    $product_id = intval($_POST['product_id']);
+
+    // If product is already in cart, increase quantity
+    if (isset($_SESSION['cart'][$product_id])) {
+        $_SESSION['cart'][$product_id]++;
+    } else {
+        // Otherwise add it with quantity 1
+        $_SESSION['cart'][$product_id] = 1;
+    }
+}
+
 include 'includes/header.php';
 
 $sql = "SELECT product_id, product_name, product_description, product_cost
@@ -29,7 +49,10 @@ if ($result->num_rows > 0) {
 ?>
 
     <div class="product">
-        <h3><?php echo htmlspecialchars($row['product_name']); ?></h3>
+
+        <h3>
+            <?php echo htmlspecialchars($row['product_name']); ?>
+        </h3>
 
         <p>
             <?php echo htmlspecialchars($row['product_description']); ?>
@@ -48,13 +71,30 @@ if ($result->num_rows > 0) {
         <p>
             Quantity in Cart: <?php echo $cart_quantity; ?>
         </p>
+
+        <form method="post" action="catalog.php">
+
+            <input
+                type="hidden"
+                name="product_id"
+                value="<?php echo $product_id; ?>"
+            >
+
+            <button type="submit" name="add_to_cart">
+                Add to Cart
+            </button>
+
+        </form>
+
     </div>
 
 <?php
     }
 
 } else {
+
     echo "<p>No products found.</p>";
+
 }
 ?>
 
